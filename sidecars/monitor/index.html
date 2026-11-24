@@ -12,13 +12,16 @@
   <div class="shell">
     <header class="header">
       <div class="header-left">
-        <h1 class="title">Context Monitor</h1>
+        <h1 id="app-title" class="title">Context Monitor</h1>
         <span id="model-badge" class="badge model-badge" title="Active model">—</span>
       </div>
-      <span id="live-pill" class="live-pill" title="Auto-refreshes every 1.5s (zero token overhead)">
-        <span class="live-dot"></span>
-        <span id="live-text">Live</span>
-      </span>
+      <div class="header-right">
+        <button id="btn-lang" type="button" class="lang-btn" title="Switch language / 切换语言">中</button>
+        <span id="live-pill" class="live-pill" title="Auto-refreshes every 1.5s">
+          <span class="live-dot"></span>
+          <span id="live-text">Live</span>
+        </span>
+      </div>
     </header>
 
     <main id="state-empty" class="empty-card hidden">
@@ -33,7 +36,7 @@
       <!-- Primary card: Current context vs. compaction threshold -->
       <section class="card hero-card" id="hero-card">
         <div class="card-top">
-          <span class="section-label">Context Usage / Compaction Threshold</span>
+          <span id="lbl-hero" class="section-label">Context Usage / Compaction Threshold</span>
           <span id="threshold-pct" class="hero-pct">0%</span>
         </div>
 
@@ -52,11 +55,11 @@
         <div class="bar-legend">
           <span class="legend-item">
             <span class="swatch swatch-cached"></span>
-            Cached <strong id="legend-cached">0</strong>
+            <span id="lbl-cached">Cached</span> <strong id="legend-cached">0</strong>
           </span>
           <span class="legend-item">
             <span class="swatch swatch-uncached"></span>
-            Uncached <strong id="legend-uncached">0</strong>
+            <span id="lbl-uncached">Uncached</span> <strong id="legend-uncached">0</strong>
           </span>
         </div>
 
@@ -68,12 +71,12 @@
       <!-- Native context window comparison -->
       <section class="card window-card">
         <div class="card-top">
-          <span class="section-label">Native Model Window</span>
+          <span id="lbl-window" class="section-label">Native Model Window</span>
           <span id="window-summary" class="mono-sub">0 / 1.05M (0%)</span>
         </div>
         <div class="window-track">
           <div id="window-fill" class="window-fill" style="width: 0%"></div>
-          <div id="window-marker" class="window-marker" style="left: 24.4%" title="Compaction threshold position">
+          <div id="window-marker" class="window-marker" style="left: 24.4%">
             <span class="marker-tag" id="marker-tag">Compact 256K</span>
           </div>
         </div>
@@ -82,17 +85,17 @@
       <!-- Secondary metrics -->
       <section class="metrics-grid">
         <div class="metric-card">
-          <div class="metric-label">Cache Hit</div>
+          <div id="lbl-cache" class="metric-label">Cache Hit</div>
           <div id="metric-cache" class="metric-value">0%</div>
           <div id="metric-cache-sub" class="metric-sub">Prompt Cache</div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">Last Output</div>
+          <div id="lbl-output" class="metric-label">Last Output</div>
           <div id="metric-output" class="metric-value">0</div>
           <div id="metric-next" class="metric-sub">Next ~0</div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">Model Calls</div>
+          <div id="lbl-calls" class="metric-label">Model Calls</div>
           <div id="metric-turns" class="metric-value">0</div>
           <div id="metric-steps" class="metric-sub">0 steps</div>
         </div>
@@ -101,7 +104,7 @@
       <!-- Growth sparkline -->
       <section class="card chart-card" id="chart-card">
         <div class="card-top">
-          <span class="section-label">Context Growth</span>
+          <span id="lbl-growth" class="section-label">Context Growth</span>
           <span id="chart-meta" class="mono-sub">Recent turns</span>
         </div>
         <div class="chart-wrap">
@@ -123,7 +126,7 @@
       <!-- Threshold settings -->
       <section class="card settings-card">
         <div class="card-top">
-          <span class="section-label">Compaction Threshold</span>
+          <span id="lbl-settings" class="section-label">Compaction Threshold</span>
           <span id="threshold-source" class="badge source-badge">Default (256K)</span>
         </div>
 
@@ -144,11 +147,11 @@
             autocomplete="off"
             aria-label="Custom compaction threshold"
           >
-          <button type="submit" class="btn btn-primary">Apply</button>
-          <button id="btn-reset" type="button" class="btn btn-ghost" title="Reset to default threshold">Reset</button>
+          <button id="btn-apply" type="submit" class="btn btn-primary">Apply</button>
+          <button id="btn-reset" type="button" class="btn btn-ghost">Reset</button>
         </form>
 
-        <p class="settings-hint">
+        <p id="lbl-hint" class="settings-hint">
           Antigravity does not expose its internal compaction ceiling in transcripts. Defaults to 256K and can be adjusted anytime.
         </p>
       </section>

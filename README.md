@@ -6,14 +6,17 @@
 
 **Live context usage and compaction threshold monitor in the Antigravity side pane.**
 
+**English** | [简体中文](README.zh-CN.md)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Antigravity Plugin](https://img.shields.io/badge/Antigravity-Plugin-0ea5e9.svg)](#installation)
 [![Sidecar UI](https://img.shields.io/badge/UI-Aux%20Pane-6366f1.svg)](#how-it-works)
+[![i18n: EN / 中文](https://img.shields.io/badge/i18n-EN%20%7C%20%E4%B8%AD%E6%96%87-8b5cf6.svg)](#features)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-10b981.svg)](#project-structure)
 
 <br />
 
-<img src="assets/preview.png" alt="Context Monitor dark and light mode preview" width="860" />
+<img src="assets/preview.png" alt="Context Monitor preview in dark (English) and light (Chinese) modes" width="860" />
 
 </div>
 
@@ -25,6 +28,7 @@
 - **Compaction Threshold & Alerts** — Displays current usage against your compaction threshold with remaining headroom and **75% (warning)** / **90% (critical)** status indicators.
 - **Native Window Comparison** — Shows where the compaction threshold sits relative to the model's full context window (e.g., 256K on a 1M window).
 - **Cache & Growth Insights** — Tracks Prompt Cache hit rate, last turn output, next-turn baseline estimate, and a live context growth sparkline.
+- **Bilingual UI (English / 简体中文)** — Auto-detects locale and provides a one-click `EN / 中` toggle in the header, persisted across sessions.
 - **Customizable Threshold & Auto-Detection** — Switch presets (`128K`–`1M`) or set any custom value; automatically detects compaction drops and offers one-click calibration.
 - **Private & Local-Only** — Read-only local transcript access, loopback HTTP only, zero telemetry, and automatic light/dark theme sync.
 
@@ -71,11 +75,12 @@ The plugin runs a lightweight Node.js sidecar (`sidecars/monitor/main.mjs`) via 
 ```text
 antigravity-context-monitor/
 ├── plugin.json                  # Plugin manifest
-├── README.md                    # Documentation
+├── README.md                    # Documentation (English)
+├── README.zh-CN.md              # Documentation (简体中文)
 ├── LICENSE                      # MIT License
 ├── assets/
 │   ├── logo.svg                 # Plugin icon
-│   └── preview.png              # Dark & light UI preview
+│   └── preview.png              # Dark (EN) & Light (ZH) UI preview
 └── sidecars/
     └── monitor/
         ├── package.json         # ESM manifest
@@ -83,7 +88,7 @@ antigravity-context-monitor/
         ├── main.mjs             # Local HTTP & transcript parser
         ├── index.html           # Side pane markup
         ├── styles.css           # Theme-adaptive styles
-        └── app.js               # Polling, sparkline, and controls
+        └── app.js               # Polling, i18n, sparkline, and controls
 ```
 
 ## Validation

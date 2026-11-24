@@ -75,12 +75,13 @@ function loadSettings() {
           raw.modelThresholds && typeof raw.modelThresholds === 'object'
             ? raw.modelThresholds
             : {},
+        lang: raw.lang === 'zh' || raw.lang === 'en' ? raw.lang : null,
       };
     }
   } catch {
     // Ignore malformed settings and fall back to defaults.
   }
-  return { customDefaultThreshold: null, modelThresholds: {} };
+  return { customDefaultThreshold: null, modelThresholds: {}, lang: null };
 }
 
 function saveSettings(settings) {
@@ -110,7 +111,7 @@ function inferContextWindow(model) {
 }
 
 function formatModelLabel(model) {
-  if (!model) return 'No model yet';
+  if (!model) return '';
   return String(model)
     .split(/[-_]/)
     .filter(Boolean)
@@ -148,29 +149,17 @@ function parseOverrideValue(raw, contextWindow) {
 
 function resolveThreshold(model, contextWindow, settings) {
   if (model && typeof settings.modelThresholds[model] === 'number') {
-    return {
-      value: settings.modelThresholds[model],
-      source: 'custom_model',
-      sourceLabel: 'Model custom',
-    };
+    return { value: settings.modelThresholds[model], source: 'custom_model' };
   }
 
   if (typeof settings.customDefaultThreshold === 'number') {
-    return {
-      value: settings.customDefaultThreshold,
-      source: 'custom',
-      sourceLabel: 'Custom',
-    };
+    return { value: settings.customDefaultThreshold, source: 'custom' };
   }
 
   const envRaw = process.env.AGY_CLI_AUTO_COMPACT_OVERRIDE;
   const envVal = parseOverrideValue(envRaw, contextWindow);
   if (envVal) {
-    return {
-      value: envVal,
-      source: 'env',
-      sourceLabel: 'Env override',
-    };
+    return { value: envVal, source: 'env' };
   }
 
   const fallback =
@@ -178,11 +167,7 @@ function resolveThreshold(model, contextWindow, settings) {
       ? Math.round(contextWindow * 0.8)
       : DEFAULT_COMPACT_THRESHOLD;
 
-  return {
-    value: fallback,
-    source: 'default',
-    sourceLabel: 'Default (256K)',
-  };
+  return { value: fallback, source: 'default' };
 }
 
 // ---------------------------------------------------------------------------
@@ -239,7 +224,6 @@ function parseTranscript(filePath) {
     try {
       obj = JSON.parse(trimmed);
     } catch {
-      // Partial line currently being appended; skip safely.
       continue;
     }
 
@@ -352,6 +336,7 @@ function buildSnapshot(conversationId, clientEtag) {
     return {
       status: 'no_conversation',
       conversationId: conversationId || null,
+      lang: settings.lang,
       etag: `none|${settingsVersion}`,
     };
   }
@@ -364,9 +349,10 @@ function buildSnapshot(conversationId, clientEtag) {
       status: 'waiting',
       conversationId,
       model: '',
-      modelLabel: 'Waiting for turn',
+      modelLabel: '',
       contextWindow: fallbackWindow,
       threshold,
+      lang: settings.lang,
       etag: `waiting|${conversationId}|${settingsVersion}`,
     };
   }
@@ -389,6 +375,7 @@ function buildSnapshot(conversationId, clientEtag) {
       contextWindow,
       threshold,
       totalSteps: parsed.totalSteps,
+      lang: settings.lang,
       etag,
     };
   }
@@ -417,6 +404,7 @@ function buildSnapshot(conversationId, clientEtag) {
     status: 'ready',
     conversationId,
     etag,
+    lang: settings.lang,
     model: parsed.model,
     modelLabel: formatModelLabel(parsed.model),
     contextWindow,
@@ -485,6 +473,19 @@ app.api(
     const action = data.action || 'set';
     const scope = data.scope === 'model' ? 'model' : 'global';
     const model = typeof data.model === 'string' ? data.model.trim() : '';
+
+    if (action === 'set_lang') {
+      if (data.lang === 'en' || data.lang === 'zh') {
+        settings.lang = data.lang;
+        saveSettings(settings);
+        settingsVersion += 1;
+        return { ok: true, lang: settings.lang, settings };
+      }
+      return new Response(JSON.stringify({ error: 'Invalid language' }), {
+        status: 400,
+        contentType: 'application/json',
+      });
+    }
 
     if (action === 'reset') {
       if (scope === 'model' && model) {
