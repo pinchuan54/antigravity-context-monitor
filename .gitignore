@@ -1,0 +1,14 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Runtime / Local state
+node_modules/
+*.log
+.env
+.env.*
+context-monitor-settings.json
+.settings.json

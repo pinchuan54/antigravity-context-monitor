@@ -1,0 +1,6 @@
+{
+  "name": "context-monitor-sidecar",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Live context usage and compaction threshold monitor sidecar for Antigravity"
+}
