@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,28 +12,28 @@
   <div class="shell">
     <header class="header">
       <div class="header-left">
-        <h1 class="title">上下文监控</h1>
-        <span id="model-badge" class="badge model-badge" title="当前使用的模型">—</span>
+        <h1 class="title">Context Monitor</h1>
+        <span id="model-badge" class="badge model-badge" title="Active model">—</span>
       </div>
-      <span id="live-pill" class="live-pill" title="每 1.5 秒自动刷新（零 Token 消耗）">
+      <span id="live-pill" class="live-pill" title="Auto-refreshes every 1.5s (zero token overhead)">
         <span class="live-dot"></span>
-        <span id="live-text">实时</span>
+        <span id="live-text">Live</span>
       </span>
     </header>
 
     <main id="state-empty" class="empty-card hidden">
       <div class="empty-icon" aria-hidden="true">◎</div>
-      <div id="empty-title" class="empty-title">等待对话数据</div>
+      <div id="empty-title" class="empty-title">Waiting for conversation</div>
       <p id="empty-desc" class="empty-desc">
-        发送第一条消息后，将自动显示当前上下文占用与压缩阈值。
+        Context usage and compaction threshold progress will appear automatically after the first model turn.
       </p>
     </main>
 
     <main id="state-ready" class="content hidden">
-      <!-- 1. 核心卡片：当前上下文 vs 压缩阈值 -->
+      <!-- Primary card: Current context vs. compaction threshold -->
       <section class="card hero-card" id="hero-card">
         <div class="card-top">
-          <span class="section-label">当前上下文 / 压缩阈值</span>
+          <span class="section-label">Context Usage / Compaction Threshold</span>
           <span id="threshold-pct" class="hero-pct">0%</span>
         </div>
 
@@ -52,79 +52,79 @@
         <div class="bar-legend">
           <span class="legend-item">
             <span class="swatch swatch-cached"></span>
-            缓存命中 <strong id="legend-cached">0</strong>
+            Cached <strong id="legend-cached">0</strong>
           </span>
           <span class="legend-item">
             <span class="swatch swatch-uncached"></span>
-            新增输入 <strong id="legend-uncached">0</strong>
+            Uncached <strong id="legend-uncached">0</strong>
           </span>
         </div>
 
         <div id="status-banner" class="status-banner normal">
-          <span id="status-text">距离压缩阈值还剩 256K tokens</span>
+          <span id="status-text">256K tokens remaining before compaction</span>
         </div>
       </section>
 
-      <!-- 2. 模型原生总窗口对照 -->
+      <!-- Native context window comparison -->
       <section class="card window-card">
         <div class="card-top">
-          <span class="section-label">模型原生窗口对照</span>
+          <span class="section-label">Native Model Window</span>
           <span id="window-summary" class="mono-sub">0 / 1.05M (0%)</span>
         </div>
         <div class="window-track">
           <div id="window-fill" class="window-fill" style="width: 0%"></div>
-          <div id="window-marker" class="window-marker" style="left: 24.4%" title="压缩阈值位置">
-            <span class="marker-tag" id="marker-tag">压缩线 256K</span>
+          <div id="window-marker" class="window-marker" style="left: 24.4%" title="Compaction threshold position">
+            <span class="marker-tag" id="marker-tag">Compact 256K</span>
           </div>
         </div>
       </section>
 
-      <!-- 3. 辅助指标 -->
+      <!-- Secondary metrics -->
       <section class="metrics-grid">
         <div class="metric-card">
-          <div class="metric-label">缓存命中率</div>
+          <div class="metric-label">Cache Hit</div>
           <div id="metric-cache" class="metric-value">0%</div>
           <div id="metric-cache-sub" class="metric-sub">Prompt Cache</div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">本轮输出</div>
+          <div class="metric-label">Last Output</div>
           <div id="metric-output" class="metric-value">0</div>
-          <div id="metric-next" class="metric-sub">下轮基线 ~0</div>
+          <div id="metric-next" class="metric-sub">Next ~0</div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">模型调用</div>
-          <div id="metric-turns" class="metric-value">0 次</div>
-          <div id="metric-steps" class="metric-sub">0 步</div>
+          <div class="metric-label">Model Calls</div>
+          <div id="metric-turns" class="metric-value">0</div>
+          <div id="metric-steps" class="metric-sub">0 steps</div>
         </div>
       </section>
 
-      <!-- 4. 增长曲线 -->
+      <!-- Growth sparkline -->
       <section class="card chart-card" id="chart-card">
         <div class="card-top">
-          <span class="section-label">上下文增长趋势</span>
-          <span id="chart-meta" class="mono-sub">最近调用</span>
+          <span class="section-label">Context Growth</span>
+          <span id="chart-meta" class="mono-sub">Recent turns</span>
         </div>
         <div class="chart-wrap">
-          <svg id="sparkline" viewBox="0 0 320 84" preserveAspectRatio="none" aria-label="上下文增长曲线"></svg>
+          <svg id="sparkline" viewBox="0 0 320 84" preserveAspectRatio="none" aria-label="Context growth chart"></svg>
         </div>
       </section>
 
-      <!-- 5. 实测压缩提示（仅检测到压缩时显示） -->
+      <!-- Compaction detection banner -->
       <section id="compaction-notice" class="card compaction-card hidden">
         <div class="compaction-row">
           <div>
-            <div class="compaction-title" id="compaction-title">检测到会话压缩</div>
+            <div class="compaction-title" id="compaction-title">Compaction detected</div>
             <div class="compaction-desc" id="compaction-desc"></div>
           </div>
-          <button id="btn-calibrate" type="button" class="btn btn-sm">用实测值校准</button>
+          <button id="btn-calibrate" type="button" class="btn btn-sm">Calibrate</button>
         </div>
       </section>
 
-      <!-- 6. 压缩阈值配置 -->
+      <!-- Threshold settings -->
       <section class="card settings-card">
         <div class="card-top">
-          <span class="section-label">压缩阈值设置</span>
-          <span id="threshold-source" class="badge source-badge">默认参考值</span>
+          <span class="section-label">Compaction Threshold</span>
+          <span id="threshold-source" class="badge source-badge">Default (256K)</span>
         </div>
 
         <div class="presets" id="presets">
@@ -140,16 +140,16 @@
             id="threshold-input"
             type="text"
             inputmode="numeric"
-            placeholder="例如 256K 或 300000"
+            placeholder="e.g. 256K or 300000"
             autocomplete="off"
-            aria-label="自定义压缩阈值"
+            aria-label="Custom compaction threshold"
           >
-          <button type="submit" class="btn btn-primary">应用</button>
-          <button id="btn-reset" type="button" class="btn btn-ghost" title="恢复默认阈值">重置</button>
+          <button type="submit" class="btn btn-primary">Apply</button>
+          <button id="btn-reset" type="button" class="btn btn-ghost" title="Reset to default threshold">Reset</button>
         </form>
 
         <p class="settings-hint">
-          Antigravity 引擎未公开实时阈值接口；默认按 256K 估算，可按你的实测随时调整。
+          Antigravity does not expose its internal compaction ceiling in transcripts. Defaults to 256K and can be adjusted anytime.
         </p>
       </section>
     </main>

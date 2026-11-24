@@ -3,7 +3,7 @@
   "args": ["main.mjs"],
   "restart_policy": "always",
   "display_name": "Context Monitor",
-  "description": "实时查看当前对话的上下文使用量、缓存命中率与自动压缩阈值。",
+  "description": "Live view of current conversation context usage, prompt cache hit rate, and compaction threshold.",
   "has_web_ui": true,
   "agent_permissions": {
     "allows_user_interactions": false

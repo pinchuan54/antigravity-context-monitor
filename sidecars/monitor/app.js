@@ -44,7 +44,6 @@
   function fmtPct(p) {
     const v = Number(p) || 0;
     if (v >= 100) return `${v.toFixed(0)}%`;
-    if (v >= 10) return `${v.toFixed(1)}%`;
     return `${v.toFixed(1)}%`;
   }
 
@@ -131,7 +130,7 @@
             stroke="var(--cm-warn)" stroke-width="1.2" stroke-dasharray="4 4" opacity="0.85" />
       <text x="${W - 4}" y="${Math.max(11, thY - 4).toFixed(1)}"
             text-anchor="end" fill="var(--cm-warn)" font-size="9.5" font-weight="600">
-        压缩阈值 ${fmtTokens(thresholdVal)}
+        Threshold ${fmtTokens(thresholdVal)}
       </text>
       ${history.length > 1 ? `<path d="${areaD}" fill="url(#cmAreaGrad)" />` : ''}
       ${history.length > 1 ? `<path d="${lineD}" fill="none" stroke="var(--cm-accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />` : ''}
@@ -144,18 +143,18 @@
     state.snap = snap;
 
     const conv = snap.conversationId || currentConv();
-    $('footer-conv').textContent = conv ? `会话 ${conv.slice(0, 8)}` : '未绑定会话';
+    $('footer-conv').textContent = conv ? `Session ${conv.slice(0, 8)}` : 'No active session';
 
     if (snap.status !== 'ready') {
       $('state-ready').classList.add('hidden');
       $('state-empty').classList.remove('hidden');
-      $('model-badge').textContent = snap.modelLabel || '待机';
+      $('model-badge').textContent = snap.modelLabel || 'Idle';
       if (snap.status === 'no_conversation') {
-        $('empty-title').textContent = '未检测到当前会话';
-        $('empty-desc').textContent = '请在 Antigravity 对话右侧面板中打开 Context Monitor。';
+        $('empty-title').textContent = 'No active conversation';
+        $('empty-desc').textContent = 'Open Context Monitor from the auxiliary side pane inside an Antigravity conversation.';
       } else {
-        $('empty-title').textContent = '等待首次模型调用';
-        $('empty-desc').textContent = '本对话开始后将自动读取真实 Token 用量并展示压缩阈值进度。';
+        $('empty-title').textContent = 'Waiting for first model turn';
+        $('empty-desc').textContent = 'Token usage and compaction threshold progress will appear automatically once the conversation starts.';
       }
       return;
     }
@@ -194,13 +193,13 @@
     const banner = $('status-banner');
     banner.className = `status-banner ${health}`;
     if (usage.thresholdPercent >= 100) {
-      $('status-text').textContent = '已达到或超过设定压缩阈值，随时可能触发自动压缩';
+      $('status-text').textContent = 'At or above threshold — automatic compaction may trigger on the next turn';
     } else if (health === 'danger') {
-      $('status-text').textContent = `即将触发压缩 · 仅剩约 ${fmtTokens(usage.remainingToThreshold)} tokens，建议尽快总结或 /compact`;
+      $('status-text').textContent = `Compaction imminent · ~${fmtTokens(usage.remainingToThreshold)} tokens left — consider /compact`;
     } else if (health === 'warning') {
-      $('status-text').textContent = `接近压缩阈值 · 剩余约 ${fmtTokens(usage.remainingToThreshold)} tokens`;
+      $('status-text').textContent = `Approaching threshold · ~${fmtTokens(usage.remainingToThreshold)} tokens remaining`;
     } else {
-      $('status-text').textContent = `状态充裕 · 距离压缩阈值还剩 ${fmtTokens(usage.remainingToThreshold)} tokens`;
+      $('status-text').textContent = `Healthy · ${fmtTokens(usage.remainingToThreshold)} tokens remaining before compaction`;
     }
 
     // Native window bar
@@ -208,32 +207,33 @@
     $('window-fill').style.width = `${Math.min(100, usage.windowPercent).toFixed(2)}%`;
     const markerPos = Math.min(98, Math.max(4, (threshold.value / contextWindow) * 100));
     $('window-marker').style.left = `${markerPos.toFixed(2)}%`;
-    $('marker-tag').textContent = `压缩线 ${fmtTokens(threshold.value)}`;
+    $('marker-tag').textContent = `Compact ${fmtTokens(threshold.value)}`;
 
     // Metrics grid
     $('metric-cache').textContent = fmtPct(usage.cacheHitRate * 100);
-    $('metric-cache-sub').textContent = `命中 ${fmtTokens(usage.cacheReadTokens)}`;
+    $('metric-cache-sub').textContent = `${fmtTokens(usage.cacheReadTokens)} cached`;
     $('metric-output').textContent = fmtTokens(usage.outputTokens);
-    $('metric-next').textContent = `下轮基线 ~${fmtTokens(usage.projectedNextInput)}`;
-    $('metric-turns').textContent = `${snap.plannerTurns} 次`;
-    $('metric-steps').textContent = `共 ${snap.totalSteps} 步`;
+    $('metric-next').textContent = `Next ~${fmtTokens(usage.projectedNextInput)}`;
+    $('metric-turns').textContent = String(snap.plannerTurns);
+    $('metric-steps').textContent = `${snap.totalSteps} steps`;
 
     // Sparkline
-    $('chart-meta').textContent = `最近 ${snap.history.length} 次调用`;
+    $('chart-meta').textContent = `Last ${snap.history.length} calls`;
     renderSparkline(snap.history, threshold.value);
 
     // Compaction notice
     if (snap.compactions && snap.compactions.length > 0 && snap.observedCompactionPeak) {
       $('compaction-notice').classList.remove('hidden');
       const last = snap.compactions[snap.compactions.length - 1];
-      $('compaction-title').textContent = `本会话已检测到 ${snap.compactions.length} 次上下文压缩`;
-      $('compaction-desc').textContent = `最近一次压缩前峰值约 ${fmtTokens(last.beforeTokens)} → 压缩后 ${fmtTokens(last.afterTokens)}`;
+      const count = snap.compactions.length;
+      $('compaction-title').textContent = `${count} compaction${count > 1 ? 's' : ''} detected in this session`;
+      $('compaction-desc').textContent = `Latest drop: ~${fmtTokens(last.beforeTokens)} → ${fmtTokens(last.afterTokens)}`;
     } else {
       $('compaction-notice').classList.add('hidden');
     }
 
     // Threshold settings
-    $('threshold-source').textContent = threshold.sourceLabel || '参考值';
+    $('threshold-source').textContent = threshold.sourceLabel || 'Reference';
     document.querySelectorAll('#presets .chip').forEach((btn) => {
       const val = Number(btn.dataset.val);
       btn.classList.toggle('active', Math.abs(val - threshold.value) < 1000);
@@ -241,11 +241,11 @@
 
     const input = $('threshold-input');
     if (document.activeElement !== input) {
-      input.placeholder = `当前 ${fmtTokens(threshold.value)}（如 256K / 512K）`;
+      input.placeholder = `Current ${fmtTokens(threshold.value)} (e.g. 256K / 512K)`;
     }
 
     $('footer-time').textContent = usage.lastUpdatedAt
-      ? `更新于 ${fmtTime(usage.lastUpdatedAt)}`
+      ? `Updated ${fmtTime(usage.lastUpdatedAt)}`
       : '';
   }
 
@@ -261,14 +261,14 @@
 
       const data = await apiGet(`/api/context?${qs.toString()}`);
       $('live-pill').classList.remove('offline');
-      $('live-text').textContent = '实时';
+      $('live-text').textContent = 'Live';
 
       if (data.unchanged) return;
       state.etag = data.etag || '';
       render(data);
     } catch (err) {
       $('live-pill').classList.add('offline');
-      $('live-text').textContent = '连接断开';
+      $('live-text').textContent = 'Disconnected';
       console.error('[context-monitor]', err);
     } finally {
       state.inflight = false;
@@ -297,7 +297,7 @@
       state.etag = '';
       await refresh(true);
     } catch (err) {
-      alert(`保存阈值失败: ${err.message}`);
+      alert(`Failed to save threshold: ${err.message}`);
     }
   }
 
@@ -326,14 +326,13 @@
       state.etag = '';
       await refresh(true);
     } catch (err) {
-      alert(`重置失败: ${err.message}`);
+      alert(`Failed to reset threshold: ${err.message}`);
     }
   });
 
   $('btn-calibrate').addEventListener('click', async () => {
     const peak = state.snap?.observedCompactionPeak;
     if (peak) {
-      // Round to nearest 1K for a clean threshold display.
       await applyThreshold(Math.round(peak / 1000) * 1000);
     }
   });

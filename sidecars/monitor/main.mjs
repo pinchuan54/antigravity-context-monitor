@@ -1,7 +1,7 @@
 /**
  * Context Monitor Sidecar Backend
  *
- * Reads the current conversation's on-disk transcript (read-only):
+ * Reads the active conversation's on-disk transcript (read-only):
  *   <appData>/brain/<conversationId>/.system_generated/logs/transcript.jsonl
  *
  * Computes real-time context window usage, prompt cache hit rate, compaction
@@ -110,7 +110,7 @@ function inferContextWindow(model) {
 }
 
 function formatModelLabel(model) {
-  if (!model) return '未检测到模型';
+  if (!model) return 'No model yet';
   return String(model)
     .split(/[-_]/)
     .filter(Boolean)
@@ -151,7 +151,7 @@ function resolveThreshold(model, contextWindow, settings) {
     return {
       value: settings.modelThresholds[model],
       source: 'custom_model',
-      sourceLabel: '当前模型自定义',
+      sourceLabel: 'Model custom',
     };
   }
 
@@ -159,7 +159,7 @@ function resolveThreshold(model, contextWindow, settings) {
     return {
       value: settings.customDefaultThreshold,
       source: 'custom',
-      sourceLabel: '全局自定义',
+      sourceLabel: 'Custom',
     };
   }
 
@@ -169,7 +169,7 @@ function resolveThreshold(model, contextWindow, settings) {
     return {
       value: envVal,
       source: 'env',
-      sourceLabel: '环境变量覆盖',
+      sourceLabel: 'Env override',
     };
   }
 
@@ -181,7 +181,7 @@ function resolveThreshold(model, contextWindow, settings) {
   return {
     value: fallback,
     source: 'default',
-    sourceLabel: '默认参考值 (256K)',
+    sourceLabel: 'Default (256K)',
   };
 }
 
@@ -337,7 +337,6 @@ function parseTranscript(filePath) {
     compactions,
   };
 
-  // Keep cache bounded to avoid memory growth across many conversations.
   if (transcriptCache.size > 32) {
     const oldestKey = transcriptCache.keys().next().value;
     transcriptCache.delete(oldestKey);
@@ -365,7 +364,7 @@ function buildSnapshot(conversationId, clientEtag) {
       status: 'waiting',
       conversationId,
       model: '',
-      modelLabel: '等待对话开始',
+      modelLabel: 'Waiting for turn',
       contextWindow: fallbackWindow,
       threshold,
       etag: `waiting|${conversationId}|${settingsVersion}`,
@@ -500,7 +499,7 @@ app.api(
 
     const rawValue = Number(data.threshold);
     if (!Number.isFinite(rawValue)) {
-      return new Response(JSON.stringify({ error: '无效的阈值数值' }), {
+      return new Response(JSON.stringify({ error: 'Invalid threshold value' }), {
         status: 400,
         contentType: 'application/json',
       });

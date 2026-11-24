@@ -2,7 +2,7 @@
   "name": "context-monitor",
   "displayName": "Context Monitor",
   "version": "0.1.0",
-  "description": "实时查看当前对话的上下文使用量、Prompt 缓存命中率与自动压缩阈值。",
+  "description": "Live sidebar monitor for current conversation context usage, prompt cache hit rate, and compaction threshold.",
   "author": {
     "name": "pinchuan54",
     "url": "https://github.com/pinchuan54"
@@ -11,8 +11,8 @@
   "repository": "https://github.com/pinchuan54/antigravity-context-monitor",
   "logo": "assets/logo.svg",
   "suggestedPrompts": [
-    "打开上下文监控侧边栏面板",
-    "分析当前对话的上下文消耗情况",
-    "调整自动压缩阈值参考值"
+    "Open the Context Monitor side panel",
+    "Review context usage for the current conversation",
+    "Adjust the compaction threshold reference"
   ]
 }
